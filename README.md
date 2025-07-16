@@ -1,2 +1,3 @@
 # ecu-can-test-automation
-Automated tests for ECU CAN-Bus using Python, python-can &amp; pytest
+
+Automated testing portfolio for ECUs over CAN bus using Python, python-can, and pytest.
