@@ -1,0 +1,10 @@
+VERSION "1.0"
+NS_ :
+BS_ :
+BU_: Tester ECU
+
+BO_ 259 DoorStatus: 1 Tester
+ SG_ DoorOpen           : 0|1@1+ (1,0) [0|1] "" Tester
+
+BO_ 515 InteriorLightStatus: 1 Tester
+ SG_ LightsOn           : 0|1@1+ (1,0) [0|1] "" Tester
