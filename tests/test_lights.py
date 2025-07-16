@@ -1,18 +1,26 @@
 # test_lights.py
-# Verifies that opening the door turns on the interior lights.
+# Verifies interior lights follow the door state: on when open, off when closed.
 
 import time
+import pytest
 from libs.can_utils import send_frame, receive_frame
 
-def test_lights_on(db, bus):
-    """DoorOpen=True should produce LightsOn=1."""
+@pytest.mark.parametrize("door_open, expected_lights", [
+    (True, 1),
+    (False, 0),
+])
+def test_lights(db, bus, door_open, expected_lights):
+    """
+    Sends DoorStatus.DoorOpen = door_open and expects
+    InteriorLightStatus.LightsOn == expected_lights.
+    """
     door_msg   = db.get_message_by_name("DoorStatus")
     lights_msg = db.get_message_by_name("InteriorLightStatus")
 
-    # Send DoorOpen=True
-    send_frame(bus, door_msg, {"DoorOpen": True})
+    # Send the door frame
+    send_frame(bus, door_msg, {"DoorOpen": door_open})
 
-    # Poll until the response with correct arbitration_id arrives
+    # Polling loop to catch the lights response
     timeout = 1.0
     deadline = time.time() + timeout
     response = None
@@ -22,6 +30,8 @@ def test_lights_on(db, bus):
             response = msg
             break
 
-    assert response, f"No response within {timeout}s"
+    assert response, f"No response within {timeout}s for DoorOpen={door_open}"
     decoded = db.decode_message(response.arbitration_id, response.data)
-    assert decoded["LightsOn"] == 1, f"Expected LightsOn=1, got {decoded['LightsOn']}"
+    assert decoded["LightsOn"] == expected_lights, (
+        f"Expected LightsOn={expected_lights}, got {decoded['LightsOn']}"
+    )
